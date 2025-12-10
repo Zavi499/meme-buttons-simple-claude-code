@@ -23,14 +23,17 @@
         }
 
         bindEvents() {
-            // Play button clicks
-            $(document).on('click', '.sbp-play-button', this.handlePlayClick.bind(this));
+            // Play button clicks (regular and 3D)
+            $(document).on('click', '.sbp-play-button, .sbp-play-button-3d', this.handlePlayClick.bind(this));
 
             // Favorite button clicks
             $(document).on('click', '.sbp-favorite-btn, .sbp-favorite-btn-large', this.handleFavoriteClick.bind(this));
 
             // Share button clicks
             $(document).on('click', '.sbp-share-btn', this.handleShareClick.bind(this));
+
+            // Social sharing icons
+            $(document).on('click', '.sbp-social-icon', this.handleSocialShare.bind(this));
 
             // Share modal close
             $(document).on('click', '.sbp-share-modal-close, .sbp-share-modal-overlay', this.closeShareModal.bind(this));
@@ -231,6 +234,55 @@
             const soundUrl = $button.data('sound-url');
 
             this.openShareModal(soundTitle, soundUrl);
+        }
+
+        /**
+         * Handle social sharing icon clicks
+         */
+        handleSocialShare(e) {
+            e.preventDefault();
+
+            const $button = $(e.currentTarget);
+            const shareType = $button.data('share');
+            const url = $button.data('url');
+            const title = $button.data('title');
+            const encodedUrl = encodeURIComponent(url);
+            const encodedTitle = encodeURIComponent(title);
+
+            switch(shareType) {
+                case 'facebook':
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank', 'width=600,height=400');
+                    break;
+                case 'twitter':
+                    window.open(`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`, '_blank', 'width=600,height=400');
+                    break;
+                case 'whatsapp':
+                    window.open(`https://wa.me/?text=${encodedTitle}%20${encodedUrl}`, '_blank', 'width=600,height=400');
+                    break;
+                case 'copy':
+                    this.copyToClipboard(url, $button);
+                    break;
+            }
+        }
+
+        /**
+         * Copy URL to clipboard
+         */
+        copyToClipboard(text, $button) {
+            // Create temporary input
+            const $temp = $('<input>');
+            $('body').append($temp);
+            $temp.val(text).select();
+
+            try {
+                document.execCommand('copy');
+                this.showFeedback($button, 'Link copied!');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                this.showFeedback($button, 'Failed to copy', 'error');
+            }
+
+            $temp.remove();
         }
 
         /**
