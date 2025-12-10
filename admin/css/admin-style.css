@@ -1,0 +1,93 @@
+/**
+ * Sound Buttons Plugin - Admin Styles
+ */
+
+/* Upload Page Tabs */
+.sbp-upload-tabs {
+    margin-top: 1.5rem;
+}
+
+.sbp-tab-content {
+    padding-top: 1.5rem;
+}
+
+/* Sound File Meta Box */
+.sbp-sound-file-meta .sbp-audio-player {
+    margin-bottom: 1rem;
+}
+
+/* Statistics Meta Box */
+.sbp-statistics-meta p {
+    margin: 0.5rem 0;
+}
+
+/* Button Variant Preview */
+.sbp-button-variant-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.sbp-variant-sample {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.sbp-variant-sample.selected {
+    border-color: #0073aa;
+    transform: scale(1.1);
+}
+
+/* Upload Results */
+.sbp-upload-results {
+    margin-top: 1rem;
+}
+
+.sbp-upload-results ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sbp-upload-results li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Category Color Picker */
+.sbp-color-picker {
+    max-width: 100px;
+}
+
+/* Settings Page */
+.sbp-settings-section {
+    margin-bottom: 2rem;
+}
+
+.sbp-settings-section h2 {
+    border-bottom: 2px solid #0073aa;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Admin Notice Enhancements */
+.notice.sbp-notice {
+    border-left-width: 4px;
+    padding: 12px;
+}
+
+.notice.sbp-notice p {
+    margin: 0.5em 0;
+}
+
+/* Responsive Admin */
+@media screen and (max-width: 782px) {
+    .sbp-upload-tabs .nav-tab {
+        padding: 0.5rem 1rem;
+        font-size: 14px;
+    }
+}
