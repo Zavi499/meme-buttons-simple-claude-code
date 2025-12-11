@@ -43,6 +43,15 @@ class SBP_Admin {
             'sbp-settings',
             array($this, 'render_settings_page')
         );
+
+        add_submenu_page(
+            'edit.php?post_type=sound',
+            __('System Info', 'sound-buttons'),
+            __('System Info', 'sound-buttons'),
+            'manage_options',
+            'sbp-system-info',
+            array($this, 'render_system_info_page')
+        );
     }
 
     /**
@@ -311,6 +320,208 @@ class SBP_Admin {
                     </button>
                 </p>
             </form>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render system info page
+     */
+    public function render_system_info_page() {
+        // Get PHP configuration
+        $max_file_uploads = ini_get('max_file_uploads');
+        $upload_max_filesize = ini_get('upload_max_filesize');
+        $post_max_size = ini_get('post_max_size');
+        $max_execution_time = ini_get('max_execution_time');
+        $max_input_time = ini_get('max_input_time');
+        $memory_limit = ini_get('memory_limit');
+
+        // Recommended values
+        $recommended = array(
+            'max_file_uploads' => 100,
+            'upload_max_filesize' => '128M',
+            'post_max_size' => '256M',
+            'max_execution_time' => 300,
+            'max_input_time' => 300,
+            'memory_limit' => '256M'
+        );
+
+        // Check if values are adequate
+        function is_adequate($current, $recommended) {
+            // Convert to bytes for comparison if it's a size value
+            if (preg_match('/^(\d+)([KMG])$/i', $current, $matches)) {
+                $current_bytes = $matches[1];
+                switch (strtoupper($matches[2])) {
+                    case 'G': $current_bytes *= 1024;
+                    case 'M': $current_bytes *= 1024;
+                    case 'K': $current_bytes *= 1024;
+                }
+            } else {
+                $current_bytes = (int)$current;
+            }
+
+            if (preg_match('/^(\d+)([KMG])$/i', $recommended, $matches)) {
+                $recommended_bytes = $matches[1];
+                switch (strtoupper($matches[2])) {
+                    case 'G': $recommended_bytes *= 1024;
+                    case 'M': $recommended_bytes *= 1024;
+                    case 'K': $recommended_bytes *= 1024;
+                }
+            } else {
+                $recommended_bytes = (int)$recommended;
+            }
+
+            return $current_bytes >= $recommended_bytes;
+        }
+        ?>
+        <div class="wrap">
+            <h1><?php _e('System Information', 'sound-buttons'); ?></h1>
+
+            <div class="notice notice-info">
+                <p>
+                    <strong><?php _e('Upload Limits:', 'sound-buttons'); ?></strong>
+                    <?php _e('These PHP settings control how many files you can upload at once and their maximum size.', 'sound-buttons'); ?>
+                </p>
+            </div>
+
+            <?php if ((int)$max_file_uploads < 50): ?>
+                <div class="notice notice-warning">
+                    <p>
+                        <strong><?php _e('Low Upload Limit Detected!', 'sound-buttons'); ?></strong>
+                        <?php printf(
+                            __('Your server is limited to %d files per upload. To upload more files at once, increase the %s setting.', 'sound-buttons'),
+                            $max_file_uploads,
+                            '<code>max_file_uploads</code>'
+                        ); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
+
+            <table class="widefat striped" style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th><?php _e('PHP Setting', 'sound-buttons'); ?></th>
+                        <th><?php _e('Current Value', 'sound-buttons'); ?></th>
+                        <th><?php _e('Recommended', 'sound-buttons'); ?></th>
+                        <th><?php _e('Status', 'sound-buttons'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>max_file_uploads</strong></td>
+                        <td><code><?php echo esc_html($max_file_uploads); ?></code></td>
+                        <td><code><?php echo esc_html($recommended['max_file_uploads']); ?></code></td>
+                        <td>
+                            <?php if (is_adequate($max_file_uploads, $recommended['max_file_uploads'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>upload_max_filesize</strong></td>
+                        <td><code><?php echo esc_html($upload_max_filesize); ?></code></td>
+                        <td><code><?php echo esc_html($recommended['upload_max_filesize']); ?></code></td>
+                        <td>
+                            <?php if (is_adequate($upload_max_filesize, $recommended['upload_max_filesize'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>post_max_size</strong></td>
+                        <td><code><?php echo esc_html($post_max_size); ?></code></td>
+                        <td><code><?php echo esc_html($recommended['post_max_size']); ?></code></td>
+                        <td>
+                            <?php if (is_adequate($post_max_size, $recommended['post_max_size'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>max_execution_time</strong></td>
+                        <td><code><?php echo esc_html($max_execution_time); ?>s</code></td>
+                        <td><code><?php echo esc_html($recommended['max_execution_time']); ?>s</code></td>
+                        <td>
+                            <?php if (is_adequate($max_execution_time, $recommended['max_execution_time'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>max_input_time</strong></td>
+                        <td><code><?php echo esc_html($max_input_time); ?>s</code></td>
+                        <td><code><?php echo esc_html($recommended['max_input_time']); ?>s</code></td>
+                        <td>
+                            <?php if (is_adequate($max_input_time, $recommended['max_input_time'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>memory_limit</strong></td>
+                        <td><code><?php echo esc_html($memory_limit); ?></code></td>
+                        <td><code><?php echo esc_html($recommended['memory_limit']); ?></code></td>
+                        <td>
+                            <?php if (is_adequate($memory_limit, $recommended['memory_limit'])): ?>
+                                <span style="color: #46b450;">✓ <?php _e('Good', 'sound-buttons'); ?></span>
+                            <?php else: ?>
+                                <span style="color: #dc3232;">⚠ <?php _e('Too Low', 'sound-buttons'); ?></span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="margin-top: 30px; padding: 20px; background: #fff; border-left: 4px solid #2271b1;">
+                <h2><?php _e('How to Increase Upload Limits', 'sound-buttons'); ?></h2>
+
+                <h3>Option 1: Edit php.ini (Recommended)</h3>
+                <p><?php _e('Contact your hosting provider or edit your php.ini file and add/modify these lines:', 'sound-buttons'); ?></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px;">max_file_uploads = 100
+upload_max_filesize = 128M
+post_max_size = 256M
+max_execution_time = 300
+max_input_time = 300
+memory_limit = 256M</pre>
+
+                <h3>Option 2: .htaccess (Apache servers)</h3>
+                <p><?php _e('Add these lines to your .htaccess file in the WordPress root:', 'sound-buttons'); ?></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px;">php_value max_file_uploads 100
+php_value upload_max_filesize 128M
+php_value post_max_size 256M
+php_value max_execution_time 300
+php_value max_input_time 300
+php_value memory_limit 256M</pre>
+
+                <h3>Option 3: wp-config.php</h3>
+                <p><?php _e('Add these lines to your wp-config.php file before "That\'s all, stop editing!":', 'sound-buttons'); ?></p>
+                <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px;">@ini_set('max_file_uploads', '100');
+@ini_set('upload_max_filesize', '128M');
+@ini_set('post_max_size', '256M');
+@ini_set('max_execution_time', '300');
+@ini_set('max_input_time', '300');
+@ini_set('memory_limit', '256M');</pre>
+
+                <h3>Option 4: Contact Hosting Support</h3>
+                <p><?php _e('If none of the above work, contact your hosting provider and request them to increase these PHP limits for you.', 'sound-buttons'); ?></p>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <p>
+                    <strong><?php _e('Note:', 'sound-buttons'); ?></strong>
+                    <?php _e('After making changes, you may need to restart your web server or PHP-FPM for changes to take effect.', 'sound-buttons'); ?>
+                </p>
+            </div>
         </div>
         <?php
     }

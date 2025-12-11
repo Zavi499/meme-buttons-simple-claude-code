@@ -32,9 +32,24 @@ class SBP_Admin_Upload {
             'taxonomy' => 'sound_category',
             'hide_empty' => false
         ));
+        // Get PHP upload limits
+        $max_file_uploads = ini_get('max_file_uploads');
         ?>
         <div class="wrap">
             <h1><?php _e('Upload Sounds', 'sound-buttons'); ?></h1>
+
+            <?php if ((int)$max_file_uploads < 50): ?>
+                <div class="notice notice-warning">
+                    <p>
+                        <strong><?php _e('Upload Limit Warning:', 'sound-buttons'); ?></strong>
+                        <?php printf(
+                            __('Your server allows a maximum of %d files per upload. To upload more files at once, please visit the %s page for instructions on increasing this limit.', 'sound-buttons'),
+                            $max_file_uploads,
+                            '<a href="' . admin_url('edit.php?post_type=sound&page=sbp-system-info') . '">' . __('System Info', 'sound-buttons') . '</a>'
+                        ); ?>
+                    </p>
+                </div>
+            <?php endif; ?>
 
             <?php if ($upload_results): ?>
                 <?php if ($upload_results['success']): ?>
@@ -137,7 +152,10 @@ class SBP_Admin_Upload {
                                 <td>
                                     <input type="file" id="bulk_files" name="bulk_files[]" accept=".mp3,audio/mpeg" multiple required>
                                     <p class="description">
-                                        <?php _e('Select multiple MP3 files. File names will be used as titles.', 'sound-buttons'); ?>
+                                        <?php printf(
+                                            __('Select multiple MP3 files. File names will be used as titles. Current server limit: %d files per upload.', 'sound-buttons'),
+                                            $max_file_uploads
+                                        ); ?>
                                     </p>
                                 </td>
                             </tr>
